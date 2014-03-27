@@ -4,8 +4,6 @@ SCRIPT_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 BASE_DIR=$SCRIPT_DIR/..
 cd $BASE_DIR
 
-echo "This script assumes you have the Postgres.app installed"
-
 # install virtualenv if necessary
 if hash virtualenv 2>/dev/null; then
   echo "virtualenv already installed, skipping"
@@ -18,23 +16,7 @@ fi
 virtualenv env
 source env/bin/activate
 
-# these two libraries should be on the path for psycopg2 to work properly
-echo "Going to link a couple ssl libraries if necessary (using sudo - you may be prompted to enter password)"
-
-if [ ! -f /usr/lib/libssl.1.0.0.dylib ]; then
-  sudo ln -s /Applications/Postgres.app/Contents/MacOS/lib/libssl.1.0.0.dylib /usr/lib/libssl.1.0.0.dylib
-fi
-
-if [ ! -f /usr/lib/libcrypto.1.0.0.dylib ]; then
-  sudo ln -s /Applications/Postgres.app/Contents/MacOS/lib/libcrypto.1.0.0.dylib /usr/lib/libcrypto.1.0.0.dylib
-fi
 
 # need archflags because XCode had some changes between 4.X to 5.X that causes the installation of numpy to fail
 # need --allow-all-external because cdecimal fails to install (hosted externally from PyPi is why I believe)
 ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future pip install --allow-all-external -r requirements.txt
-
-echo """
-You should add the following to your environment (generally to .bash_profile)
-
-export DATABASE_URL=postgres://YOUR_DB_URL_HERE
-"""
